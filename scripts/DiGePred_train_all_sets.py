@@ -100,7 +100,7 @@ for m in models:
     full_set_X = pd.concat([digenic_pairs_df, non_digenic_pairs_df], ignore_index=True)
     full_set_y = np.asarray([1] * len(digenic_pairs_list) + [0] * len(non_digenic_pairs_list))
 
-    sss_splitter = StratifiedShuffleSplit(n_splits=10, test_size=0.2, random_state=xxxx)
+    sss_splitter = StratifiedShuffleSplit(n_splits=10, test_size=0.2, random_state=42)
 
     clf = RandomForestClassifier(n_jobs=1, n_estimators=500, max_depth=15)
 
