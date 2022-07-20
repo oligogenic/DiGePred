@@ -1,10 +1,15 @@
 from sklearn.metrics import *
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import StratifiedShuffleSplit
-import numpy as np
+import numpy as np #
 import pandas as pd
 import datetime
 import random
+import pickle
+
+pd.set_option('display.width', 10000)
+pd.set_option('display.max_columns', 50)
+pd.set_option('display.max_rows', 5000)
 
 now = datetime.datetime.now()
 month = str(now.strftime("%b"))
@@ -57,7 +62,7 @@ models = {'unaffected': {'pos': digenic_training,
           'unaffected no gene overlap': {'pos': digenic_training_no_overlap,
                                          'neg': unaffected_no_gene_overlap_non_digenic_training},
           'random no gene overlap': {'pos': digenic_training_no_overlap,
-                                     'neg': random_no_gene_overlap_non_digenic_training},
+                                    'neg': random_no_gene_overlap_non_digenic_training},
           }
 
 roc_aucs = {}
@@ -139,6 +144,13 @@ for m in models:
         test_data[m].append(y_test)
         pred_probs[m].append(preds[:, 1])
 
+    # Saving model
+    clf = RandomForestClassifier(n_jobs=1, n_estimators=500, max_depth=15)
+    # Fit the model on training set
+    clf.fit(full_set_X, full_set_y)
+    # save the model to disk
+    pickle.dump(clf, open('~/'+m+'_{month}{day}_{year}.sav'.format(month=month, day=day, year=year), 'wb'))
+
 data_cols = {
     'ROC_AUCs': roc_aucs,
     'PR_AUCs': pr_aucs,
@@ -153,9 +165,11 @@ data_cols = {
 
 df = pd.DataFrame(index=list(models), columns=data_cols.keys())
 
+print(df.head())
 for m in models:
     for d in data_cols:
         df[d][m] = data_cols[d][m]
+print(df.head())
 
 df.to_pickle('~/DiGePred_training_performance_{month}{day}_{year}.pkl'.format(month=month, day=day, year=year))
 
