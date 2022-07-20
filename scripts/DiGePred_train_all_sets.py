@@ -1,43 +1,41 @@
 from sklearn.metrics import *
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import StratifiedShuffleSplit
-import numpy as np #
+import numpy as np # numpy == 1.19.5
 import pandas as pd
 import datetime
 import random
 import pickle
-
-pd.set_option('display.width', 10000)
-pd.set_option('display.max_columns', 50)
-pd.set_option('display.max_rows', 5000)
 
 now = datetime.datetime.now()
 month = str(now.strftime("%b"))
 day = str(now.strftime("%d"))
 year = str(now.strftime("%y"))
 
+REMOVE_PHEN = True
+
 sel_feats = ['common_pathways',
-           'common_phenotypes',
-           'Co-expression_coefficient',
-           'PPI_network_dist',
-           'PWY_network_dist',
-           'Txt_network_dist',
-           'LoFintolerance_combined',
-           'Haploinsufficiency_combined',
-           'Age_combined',
-           'dN/dS_combined',
-           'Essentiality_combined',
-           '#ofpathways_combined',
-           '#ofPhenotypeCodes_combined',
-           '#ofNeighborsPPI_combined',
-           '#ofNeighborsPWY_combined',
-           '#ofNeighborsTxt_combined',
-           '#ofHighlyCoexpressed_combined',
-           '#Common_PPI_Neighbors',
-           '#common_PWY_neighbors',
-           '#Common_Txt_Neighbors',
-           '#Common_coexpressed',
-           ]
+             'common_phenotypes',
+             'Co-expression_coefficient',
+             'PPI_network_dist',
+             'PWY_network_dist',
+             'Txt_network_dist',
+             'LoFintolerance_combined',
+             'Haploinsufficiency_combined',
+             'Age_combined',
+             'dN/dS_combined',
+             'Essentiality_combined',
+             '#ofpathways_combined',
+             '#ofPhenotypeCodes_combined',
+             '#ofNeighborsPPI_combined',
+             '#ofNeighborsPWY_combined',
+             '#ofNeighborsTxt_combined',
+             '#ofHighlyCoexpressed_combined',
+             '#Common_PPI_Neighbors',
+             '#common_PWY_neighbors',
+             '#Common_Txt_Neighbors',
+             '#Common_coexpressed',
+             ]
 
 # Import dfs
 digenic_training = pd.read_csv("../../DiGePred/positives/training/digenic_DIDA_pairs_training.csv", index_col=0)
@@ -48,6 +46,14 @@ permuted_non_digenic_training = pd.read_csv('../../DiGePred/negatives/training/p
 matched_non_digenic_training = pd.read_csv('../../DiGePred/negatives/training/matched_non_digenic_pairs_training.csv', index_col=0)
 unaffected_no_gene_overlap_non_digenic_training = pd.read_csv('../../DiGePred/negatives/training/unaffected-no-gene-overlap_non_digenic_pairs_training.csv', index_col=0)
 random_no_gene_overlap_non_digenic_training = pd.read_csv('../../DiGePred/negatives/training/random-no-gene-overlap_non_digenic_pairs_training.csv', index_col=0)
+
+if REMOVE_PHEN:
+    list_dfs = [digenic_training, digenic_training_no_overlap, unaffected_non_digenic_training,
+                random_non_digenic_training, permuted_non_digenic_training, matched_non_digenic_training,
+                unaffected_no_gene_overlap_non_digenic_training, random_no_gene_overlap_non_digenic_training]
+    for dataframe in list_dfs:
+        dataframe.drop("common_phenotypes", axis=1, inplace=True)
+        dataframe.drop("#ofPhenotypeCodes_combined", axis=1, inplace=True)
 
 # define models with correpsonding positive and negative sets
 
@@ -149,7 +155,10 @@ for m in models:
     # Fit the model on training set
     clf.fit(full_set_X, full_set_y)
     # save the model to disk
-    pickle.dump(clf, open('~/'+m+'_{month}{day}_{year}.sav'.format(month=month, day=day, year=year), 'wb'))
+    if REMOVE_PHEN:
+        pickle.dump(clf, open("without_phenotype_features_"+m+'_{month}{day}_{year}.sav'.format(month=month, day=day, year=year), 'wb'))
+    else:
+        pickle.dump(clf, open(m+'_{month}{day}_{year}.sav'.format(month=month, day=day, year=year), 'wb'))
 
 data_cols = {
     'ROC_AUCs': roc_aucs,
@@ -165,11 +174,14 @@ data_cols = {
 
 df = pd.DataFrame(index=list(models), columns=data_cols.keys())
 
-print(df.head())
 for m in models:
     for d in data_cols:
         df[d][m] = data_cols[d][m]
-print(df.head())
 
-df.to_pickle('~/DiGePred_training_performance_{month}{day}_{year}.pkl'.format(month=month, day=day, year=year))
+if REMOVE_PHEN:
+    df.to_pickle('~/without_phenotype_features_DiGePred_training_performance_{month}{day}_{year}.pkl'.format(month=month
+                                                                                                             , day=day,
+                                                                                                             year=year))
+else:
+    df.to_pickle('~/DiGePred_training_performance_{month}{day}_{year}.pkl'.format(month=month, day=day, year=year))
 
