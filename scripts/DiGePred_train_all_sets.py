@@ -3,7 +3,6 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import StratifiedShuffleSplit
 import numpy as np
 import pandas as pd
-
 import datetime
 import random
 
@@ -36,15 +35,14 @@ sel_feats = ['common_pathways',
            ]
 
 # Import dfs
-
-digenic_training = pd.read_csv('~/')
-digenic_training_no_overlap = pd.read_csv('~/')
-unaffected_non_digenic_training = pd.read_csv('~/')
-random_non_digenic_training = pd.read_csv('~/')
-permuted_non_digenic_training = pd.read_csv('~/')
-matched_non_digenic_training = pd.read_csv('~/')
-unaffected_no_gene_overlap_non_digenic_training = pd.read_csv('~/')
-random_no_gene_overlap_non_digenic_training = pd.read_csv('~/')
+digenic_training = pd.read_csv("../../DiGePred/positives/training/digenic_DIDA_pairs_training.csv", index_col=0)
+digenic_training_no_overlap = pd.read_csv('../../DiGePred/positives/training/digenic_DIDA_pairs_no-gene-overlap_training.csv', index_col=0)
+unaffected_non_digenic_training = pd.read_csv('../../DiGePred/negatives/training/unaffected_non_digenic_pairs_training.csv', index_col=0)
+random_non_digenic_training = pd.read_csv('../../DiGePred/negatives/training/random_non_digenic_pairs_training.csv', index_col=0)
+permuted_non_digenic_training = pd.read_csv('../../DiGePred/negatives/training/permuted_non_digenic_pairs_training.csv', index_col=0)
+matched_non_digenic_training = pd.read_csv('../../DiGePred/negatives/training/matched_non_digenic_pairs_training.csv', index_col=0)
+unaffected_no_gene_overlap_non_digenic_training = pd.read_csv('../../DiGePred/negatives/training/unaffected-no-gene-overlap_non_digenic_pairs_training.csv', index_col=0)
+random_no_gene_overlap_non_digenic_training = pd.read_csv('../../DiGePred/negatives/training/random-no-gene-overlap_non_digenic_pairs_training.csv', index_col=0)
 
 # define models with correpsonding positive and negative sets
 
