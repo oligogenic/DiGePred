@@ -8,6 +8,10 @@ import argparse
 import itertools
 import datetime
 
+pd.set_option('display.width', 10000)
+pd.set_option('display.max_columns', 50)
+pd.set_option('display.max_rows', 5000)
+
 now = datetime.datetime.now()
 month = str(now.strftime("%m"))
 day = str(now.strftime("%d"))
