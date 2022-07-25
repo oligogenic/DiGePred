@@ -19,32 +19,6 @@ year = str(now.strftime("%Y"))
 hour = str(now.strftime("%H"))
 minute = str(now.strftime("%M"))
 
-## Load pathway data files
-reactome_gene_to_path_codes = pickle.load(open('~/DiGePred/data/pathways/path-to-{reactome_gene_to_path_codes}-file', 'rb'))
-kegg_gene_to_path_codes = pickle.load(open('~/DiGePred/data/pathways/path-to-{kegg_gene_to_path_codes}-file', 'rb'))
-
-## Load phenotype data files
-hpo_gene_to_code = pickle.load(open('~/DiGePred/data/phenotypes/path-to-{hpo_gene_to_code}-file', 'rb'))
-
-## Load co-expression data files
-coexpress_dict = pickle.load(open('~/DiGePred/data/coex/path-to-{coexpress_dict}-file', 'rb'))
-
-## Load network data files
-G_ppi = nx.read_dot('~/DiGePred/data/networks/path-to-{UCSC_ppi_dot}-file')
-G_pwy = nx.read_dot('~/DiGePred/data/networks/path-to-{UCSC_pwy_dot}-file')
-G_txt = nx.read_dot('~/DiGePred/data/networks/path-to-{UCSC_txt-dot}-file')
-
-dists_ppi = pickle.load(open('~/DiGePred/data/networks/path-to-{ppi_dists_dict}-file', 'rb'))
-dists_pwy = pickle.load(open('~/DiGePred/data/networks/path-to-{pwy_dists_dict}-file', 'rb'))
-dists_txt = pickle.load(open('~/DiGePred/data/networks/path-to-{txt_dists_dict}-file', 'rb'))
-
-## Load evoltuonary biology and genomics feature data files
-lof_dict = pickle.load(open('~/DiGePred/data/evolgen/path-to-{lof_pli_dict}-file', 'rb'))
-hap_insuf_dict = pickle.load(open('~/DiGePred/data/evolgen/path-to-{happloinsufficiency_dict}-file', 'rb'))
-protein_age_dict = pickle.load(open('~/DiGePred/data/evolgen/path-to-{protein_age_dict}-file', 'rb'))
-dNdS_avg_dict = pickle.load(open('~/DiGePred/data/evolgen/path-to-{dNdS_avg_dict}-file', 'rb'))
-gene_ess_dict = pickle.load(open('~/DiGePred/data/evolgen/path-to-{Gene_Essentiality_dict}-file', 'rb'))
-
 parser = argparse.ArgumentParser(description='Get DiGePred results')
 
 parser.add_argument('-g', '--genes', type=str,
@@ -67,12 +41,45 @@ parser.add_argument('-n', '--name', type=str,
                     help='project name to be specified by user. If not provided, output file will be named with current date and time.',
                     dest='name', required=False,
                     metavar='')
+parser.add_argument('-w_p', '--with-phenotype', action='store_true', help='The model is trained with all features.')
+parser.add_argument('-wo_p', '--without-phenotype', dest='remove_phen_features', action='store_true', help='The model is trained without the phenotypes features')
+parser.set_defaults(remove_phen_features=False)
+parser.add_argument('-path', '--path-to-folder', dest='path_folder', help='Path where the folder DiGePred is stored, ex: /Users/Desktop', required=True, type=str)
+args = vars(parser.parse_args())
+
+
+## Load pathway data files
+reactome_gene_to_path_codes = pickle.load(open(args["path_folder"]+'/DiGePred/data/pathways/reactome/reactome_gene_to_path_codes.txt', 'rb'))
+kegg_gene_to_path_codes = pickle.load(open(args["path_folder"]+'/DiGePred/data/pathways/kegg/kegg_gene_to_path_codes.txt', 'rb'))
+
+## Load phenotype data files
+hpo_gene_to_code = pickle.load(open(args["path_folder"]+'/DiGePred/data/phenotypes/hpo/hpo_gene_to_code.txt', 'rb'))
+
+## Load co-expression data files
+coexpress_dict = pickle.load(open(args["path_folder"]+'/DiGePred/data/coex/mutual_co-expression_rank_dict.txt', 'rb'))
+
+## Load network data files
+G_ppi = nx.read_dot(args["path_folder"]+'/DiGePred/data/networks/UCSC_ppi_network_new.dot')
+G_pwy = nx.read_dot(args["path_folder"]+'/DiGePred/data/networks/UCSC_pwy_network_new.dot')
+G_txt = nx.read_dot(args["path_folder"]+'/DiGePred/data/networks/UCSC_txt_network_new.dot')
+
+dists_ppi = pickle.load(open(args["path_folder"]+'/DiGePred/data/networks/PPI_network_all_pairs_shortest_paths_Feb21_19.pkl', 'rb'))
+dists_pwy = pickle.load(open(args["path_folder"]+'/DiGePred/data/networks/PWY_network_all_pairs_shortest_paths_Feb21_19.pkl', 'rb'))
+dists_txt = pickle.load(open(args["path_folder"]+'/DiGePred/data/networks/Txt_network_all_pairs_shortest_paths_Feb21_19.pkl', 'rb'))
+
+## Load evoltuonary biology and genomics feature data files
+lof_dict = pickle.load(open(args["path_folder"]+'/DiGePred/data/evolgen/lof_pli_dict.pickle', 'rb'))
+hap_insuf_dict = pickle.load(open(args["path_folder"]+'/DiGePred/data/evolgen/happloinsufficiency_dict.pickle', 'rb'))
+protein_age_dict = pickle.load(open(args["path_folder"]+'/DiGePred/data/evolgen/protein_age_dict.pickle', 'rb'))
+dNdS_avg_dict = pickle.load(open(args["path_folder"]+'/DiGePred/data/evolgen/dNdS_avg.pickle', 'rb'))
+gene_ess_dict = pickle.load(open(args["path_folder"]+'/DiGePred/data/evolgen/Gene_Essentiality_dict.txt', 'rb'))
+
 
 genes = []
 pairs = []
 
 if parser.parse_args().pairs:
-    pairs_list = open(parser.parse_args().pairs).read().split('\n')[:-1]
+    pairs_list = open(args["path_folder"] + parser.parse_args().pairs).read().split('\n')[:-1]
 
     for line in pairs_list:
         g1 = line.split(',')[0].strip().rstrip()
