@@ -414,11 +414,25 @@ def get_features(pairs):
 
     ])
 
-    if args['remove_phen_features']:
-        print("before df shape:", df.shape)
-        df.drop("common_phenotypes", axis=1, inplace=True)
-        df.drop("#ofPhenotypeCodes_combined", axis=1, inplace=True)
-        print("phenotype features removed", df.shape)
+    # Rename df columns in order to match columns name in the training
+    df = df.rename(columns={'#ofpathways':"#ofpathways_combined",
+                             '#ofphenotypes':"#ofPhenotypeCodes_combined",
+                             '#ofNeighborsPPI':"#ofNeighborsPPI_combined",
+                             '#ofNeighborsPWY':"#ofNeighborsPWY_combined",
+                             '#ofNeighborsTxt':"#ofNeighborsTxt_combined",
+                             '#ofHighlyCoexpressed':"#ofHighlyCoexpressed_combined",
+                             'LoFintolerance':"LoFintolerance_combined",
+                             'Haploinsufficiency':"Haploinsufficiency_combined",
+                             'protein_Age': "Age_combined",
+                             'dN/dS':"dN/dS_combined",
+                             'Essentiality':"Essentiality_combined"})
+    # Reorder columns to matche the column's order during the training
+    df = df[["common_pathways", "common_phenotypes", "Co-expression_coefficient", "PPI_network_dist", \
+         "PWY_network_dist","Txt_network_dist","LoFintolerance_combined","Haploinsufficiency_combined", \
+         "Age_combined","dN/dS_combined","Essentiality_combined","#ofpathways_combined", \
+         "#ofPhenotypeCodes_combined","#ofNeighborsPPI_combined","#ofNeighborsPWY_combined", \
+         "#ofNeighborsTxt_combined","#ofHighlyCoexpressed_combined","#Common_PPI_Neighbors", \
+         "#common_PWY_neighbors","#Common_Txt_Neighbors","#Common_coexpressed"]]
 
     return df
 
@@ -432,3 +446,8 @@ if __name__ == '__main__':
     digepred_res_df.to_csv(args["path_folder"]+'/output/scores_pairs_input/{resultat_{project_name}.csv'.format(project_name=project_name),
                     sep=',', header=True, index=False)  # save feature values and predictions as DiGePred results CSV.
 
+if args['remove_phen_features']:
+    print("before df shape:", df.shape)
+    df.drop("common_phenotypes", axis=1, inplace=True)
+    df.drop("#ofPhenotypeCodes_combined", axis=1, inplace=True)
+    print("phenotype features removed", df.shape)
