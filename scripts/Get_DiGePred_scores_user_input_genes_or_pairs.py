@@ -132,7 +132,7 @@ def get_features(pairs):
 
     all_data = []
 
-    for x in new_list_pairs:
+    for x in sorted(new_list_pairs):
 
         data = np.empty(21)
 
@@ -383,7 +383,7 @@ def get_features(pairs):
         data[20] = vqm
         all_data.append(data)
 
-    df = pd.DataFrame(np.array(all_data), index=new_list_pairs, columns=[
+    df = pd.DataFrame(np.array(all_data), index=sorted(new_list_pairs), columns=[
         # Pathways
         '#ofpathways',  # 0
         'common_pathways',  # 1
@@ -438,7 +438,6 @@ def get_features(pairs):
              "#ofPhenotypeCodes_combined", "#ofNeighborsPPI_combined", "#ofNeighborsPWY_combined", \
              "#ofNeighborsTxt_combined", "#ofHighlyCoexpressed_combined", "#Common_PPI_Neighbors", \
              "#common_PWY_neighbors", "#Common_Txt_Neighbors", "#Common_coexpressed"]]
-    print(df.head())
     return df
 
 
@@ -446,16 +445,14 @@ if __name__ == '__main__':
 
     digepred_res_df = get_features(pairs)  # get feature values and save in a pandas DiGePred results df.
     if args['remove_phen_features']:
-        print("before df shape:", digepred_res_df.shape)
         digepred_res_df.drop("common_phenotypes", axis=1, inplace=True)
         digepred_res_df.drop("#ofPhenotypeCodes_combined", axis=1, inplace=True)
-        print("phenotype features removed", digepred_res_df.shape)
     p = clfs[model].predict_proba(digepred_res_df)[:, 1]  # get predictions based on DiGePred model specified.
     digepred_res_df[model] = p  # add column to DiGePred result df.
 
     if args['remove_phen_features']:
         digepred_res_df.to_csv(args[
-                                   "path_folder"] + '/output/scores_pairs_input/without_phenotype_features_results' + project_name + '.csv',
+                                   "path_folder"] + '/output/scores_pairs_input/without_phenotype_features_results_' + project_name + '.csv',
                                sep='\t', header=True,
                                index=True)  # save feature values and predictions as DiGePred results CSV.
     else:
