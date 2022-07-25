@@ -129,7 +129,7 @@ def get_features(pairs):
 
     for x in new_list_pairs:
 
-        data = np.empty((1, 21))
+        data = np.empty(21)
 
         #  Pathway
         path1 = []
@@ -155,12 +155,12 @@ def get_features(pairs):
         common = list(set(path1).intersection(path2))
 
         vqm = np.sqrt((len(path1) ** 2 + len(path2) ** 2) / 2)
-        data[0][0] = vqm
+        data[0] = vqm
 
         if len(total) == 0:
-            data[0][1] = 0.
+            data[1] = 0.
         else:
-            data[0][1] = float(len(common)) / len(total)
+            data[1] = float(len(common)) / len(total)
 
         # HPO
         hpo1 = []
@@ -173,12 +173,12 @@ def get_features(pairs):
         common = list(set(hpo1).intersection(hpo2))
         vqm = np.sqrt((len(hpo1) ** 2 + len(hpo2) ** 2) / 2)
 
-        data[0][2] = vqm
+        data[2] = vqm
 
         if len(total) == 0:
-            data[0][3] = 0.
+            data[3] = 0.
         else:
-            data[0][3] = float(len(common)) / len(total)
+            data[3] = float(len(common)) / len(total)
 
         # PPI Network
         dist = []
@@ -201,15 +201,15 @@ def get_features(pairs):
         common = list(set(neighbors1).intersection(neighbors2))
         vqm = np.sqrt((len(neighbors1) ** 2 + len(neighbors2) ** 2) / 2)
 
-        data[0][4] = vqm
+        data[4] = vqm
 
         if len(total) == 0:
-            data[0][5] = 0.
+            data[5] = 0.
         else:
-            data[0][5] = float(len(common)) / len(total)
+            data[5] = float(len(common)) / len(total)
 
         # data[i][8] = len(common)
-        data[0][6] = ppi_dist
+        data[6] = ppi_dist
 
         # PWY Network
         dist = []
@@ -233,15 +233,15 @@ def get_features(pairs):
         common = list(set(neighbors1).intersection(neighbors2))
         vqm = np.sqrt((len(neighbors1) ** 2 + len(neighbors2) ** 2) / 2)
 
-        data[0][7] = vqm
+        data[7] = vqm
 
         if len(total) == 0:
-            data[0][8] = 0.
+            data[8] = 0.
         else:
-            data[0][8] = float(len(common)) / len(total)
+            data[8] = float(len(common)) / len(total)
 
         # data[i][12] = len(common)
-        data[0][9] = pwy_dist
+        data[9] = pwy_dist
 
         # TXT Network
         dist = []
@@ -265,15 +265,15 @@ def get_features(pairs):
         common = list(set(neighbors1).intersection(neighbors2))
         vqm = np.sqrt((len(neighbors1) ** 2 + len(neighbors2) ** 2) / 2)
 
-        data[0][10] = vqm
+        data[10] = vqm
 
         if len(total) == 0:
-            data[0][11] = 0.
+            data[11] = 0.
         else:
-            data[0][11] = float(len(common)) / len(total)
+            data[11] = float(len(common)) / len(total)
 
         # data[i][16] = len(common)
-        data[0][12] = txt_dist
+        data[12] = txt_dist
 
         # Co-expression
 
@@ -293,15 +293,15 @@ def get_features(pairs):
         common = list(set(rankcoex1).intersection(rankcoex2))
         vqm = np.sqrt((len(rankcoex1) ** 2 + len(rankcoex2) ** 2) / 2)
 
-        data[0][13] = vqm
+        data[13] = vqm
 
         if len(total) == 0:
-            data[0][14] = 0.
+            data[14] = 0.
         else:
-            data[0][14] = float(len(common)) / len(total)
+            data[14] = float(len(common)) / len(total)
 
         # data[i][20] = len(common)
-        data[0][15] = coexvalue
+        data[15] = coexvalue
 
         # Lof
 
@@ -316,7 +316,7 @@ def get_features(pairs):
             v2 = 0
 
         vqm = np.sqrt((v1 ** 2 + v2 ** 2) / 2)
-        data[0][16] = vqm
+        data[16] = vqm
 
         # Happloinsufficiency Analysis
 
@@ -331,7 +331,7 @@ def get_features(pairs):
             v2 = 0
 
         vqm = np.sqrt((v1 ** 2 + v2 ** 2) / 2)
-        data[0][17] = vqm
+        data[17] = vqm
 
         # Protein Age
 
@@ -346,7 +346,7 @@ def get_features(pairs):
             v2 = 0
 
         vqm = np.sqrt((v1 ** 2 + v2 ** 2) / 2)
-        data[0][18] = vqm
+        data[18] = vqm
 
         # dN/DS
 
@@ -361,7 +361,7 @@ def get_features(pairs):
             v2 = 0
 
         vqm = np.sqrt((v1 ** 2 + v2 ** 2) / 2)
-        data[0][19] = vqm
+        data[19] = vqm
 
         # Gene Essentiality
 
@@ -375,9 +375,10 @@ def get_features(pairs):
             v2 = 0.
 
         vqm = np.sqrt((v1 ** 2 + v2 ** 2) / 2)
-        data[0][20] = vqm
+        data[20] = vqm
+        all_data.append(data)
 
-    df = pd.DataFrame(all_data, index=new_list_pairs, columns=[
+    df = pd.DataFrame(np.array(all_data), index=new_list_pairs, columns=[
         # Pathways
         '#ofpathways',  # 0
         'common_pathways',  # 1
