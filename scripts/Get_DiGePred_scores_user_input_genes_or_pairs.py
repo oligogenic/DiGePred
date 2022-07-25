@@ -45,6 +45,8 @@ parser.add_argument('-w_p', '--with-phenotype', action='store_true', help='The m
 parser.add_argument('-wo_p', '--without-phenotype', dest='remove_phen_features', action='store_true', help='The model is trained without the phenotypes features')
 parser.set_defaults(remove_phen_features=False)
 parser.add_argument('-path', '--path-to-folder', dest='path_folder', help='Path where the folder DiGePred is stored, ex: /Users/Desktop', required=True, type=str)
+parser.add_argument('-d', '--date-model-name', dest='date', help='date of creation of the re-trained model. Format MMMDD_YY ex: Jul25_222', required=True, type=str)
+
 args = vars(parser.parse_args())
 
 
@@ -79,7 +81,7 @@ genes = []
 pairs = []
 
 if parser.parse_args().pairs:
-    pairs_list = open(args["path_folder"] + parser.parse_args().pairs).read().split('\n')[:-1]
+    pairs_list = open(args["path_folder"] +"/"+ parser.parse_args().pairs).read().split('\n')[:-1]
 
     for line in pairs_list:
         g1 = line.split(',')[0].strip().rstrip()
@@ -104,14 +106,18 @@ model = parser.parse_args().model
 ## Load DiGePred models
 
 clfs = dict()
+if args['remove_phen_features']:
+    model_name = args["path_folder"] + '/output/retrained_models/without_phenotype_features_'
+else:
+    model_name = args["path_folder"] + '/output/retrained_models/'
 
-clfs['permuted'] = pd.read_pickle('~/DiGePred/models/path-to-{permuted_model}-file')
-clfs['random'] = pd.read_pickle('~/DiGePred/models/path-to-{random_model}-file')
-clfs['matched'] = pd.read_pickle('~/DiGePred/models/path-to-{matched_model}-file')
-clfs['unaffected'] = pd.read_pickle('~/DiGePred/models/path-to-{unaffected_model}-file')
-clfs['all-digenic-vs-unaffected'] = pd.read_pickle('~/DiGePred/models/path-to-{all-digenic-vs-unaffected_model}-file')
-clfs['unaffected-no-gene-overlap'] = pd.read_pickle('~/DiGePred/models/path-to-{unaffected-no-gene-overlap_model}-file')
-clfs['random-no-gene-overlap'] = pd.read_pickle('~/DiGePred/models/path-to-{random-no-gene-overlap_model}-file')
+clfs['permuted'] = pd.read_pickle(model_name+'permuted_'+args['date'] + ".sav")
+clfs['random'] = pd.read_pickle(model_name +'random_'+args['date'] + ".sav")
+clfs['matched'] = pd.read_pickle(model_name +'matched_'+args['date'] + ".sav")
+clfs['unaffected'] = pd.read_pickle(model_name +'unaffected_'+args['date'] + ".sav")
+#clfs['all-digenic-vs-unaffected'] = pd.read_pickle(model_name +'all-digenic-vs-unaffected_'+args['date'] + ".sav")
+clfs['unaffected-no-gene-overlap'] = pd.read_pickle(model_name+'unaffected no gene overlap_'+args['date'] + ".sav")
+clfs['random-no-gene-overlap'] = pd.read_pickle(model_name +'random no gene overlap_'+args['date'] + ".sav")
 
 
 ## Function to get feature values as a pandas dataframe
@@ -416,6 +422,6 @@ if __name__ == '__main__':
     p = clfs[model].predict_proba(digepred_res_df)[:, 1]  # get predictions based on DiGePred model specified.
     digepred_res_df[model] = p  # add column to DiGePred result df.
 
-    digepred_res_df.to_csv('~/DiGePred/results/{path}_{project_name}.csv'.format(project_name=project_name),
+    digepred_res_df.to_csv(args["path_folder"]+'/output/scores_pairs_input/{resultat_{project_name}.csv'.format(project_name=project_name),
                     sep=',', header=True, index=False)  # save feature values and predictions as DiGePred results CSV.
 
