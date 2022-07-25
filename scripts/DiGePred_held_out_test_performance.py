@@ -4,11 +4,21 @@ import pandas as pd
 import matplotlib as mpl
 import datetime
 from sklearn.metrics import *
+import argparse
 
 now = datetime.datetime.now()
 month = str(now.strftime("%b"))
 day = str(now.strftime("%d"))
 year = str(now.strftime("%y"))
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-w_p', '--with-phenotype', action='store_true', help='The model is trained with all features.')
+parser.add_argument('-wo_p', '--without-phenotype', dest='remove_phen_features', action='store_true',
+                    help='The model is trained without the phenotypes features')
+parser.set_defaults(remove_phen_features=False)
+parser.add_argument('-p', '--path-to-folder', dest='path_folder',
+                    help='Path where the folder DiGePred is stored, ex: /Users/Desktop', required=True, type=str)
+args = vars(parser.parse_args())
 
 sel_feats = ['common_pathways',
              'common_phenotypes',
@@ -32,6 +42,9 @@ sel_feats = ['common_pathways',
              '#Common_Txt_Neighbors',
              '#Common_coexpressed',
              ]
+if args['remove_phen_features']:
+    sel_feats.remove("common_phenotypes")
+    sel_feats.remove("#ofPhenotypeCodes_combined")
 
 clf_set_col = {'permuted': '#fd8d3c',
                'random': '#238b45',
@@ -42,43 +55,44 @@ clf_set_col = {'permuted': '#fd8d3c',
                'random no gene overlap': '#c7e9c0'
                }
 
+path_n = args["path_folder"] + '/DiGePred/negatives/held-out-testing'
+path_p = args["path_folder"] + '/DiGePred/positives/held-out-testing'
 
 models = {
-    'unaffected': {'pos': pd.read_csv('~/digenic_pairs_held_out.csv')[sel_feats],
-                   'neg': pd.read_csv('~/unaffected_non_digenic_pairs_held_out.csv')[sel_feats]
+    'unaffected': {'pos': pd.read_csv(path_p+'/digenic_pairs_held_out.csv')[sel_feats],
+                   'neg': pd.read_csv(path_n+'/unaffected_non_digenic_pairs_held_out.csv')[sel_feats]
                    },
-    'permuted': {'pos': pd.read_csv('~/digenic_pairs_held_out.csv')[sel_feats],
-                 'neg': pd.read_csv('~/permuted_non_digenic_pairs_held_out.csv')[sel_feats]
+    'permuted': {'pos': pd.read_csv(path_p+'/digenic_pairs_held_out.csv')[sel_feats],
+                 'neg': pd.read_csv(path_n+'/permuted_non_digenic_pairs_held_out.csv')[sel_feats]
                  },
-    'random': {'pos': pd.read_csv('~/digenic_pairs_held_out.csv')[sel_feats],
-               'neg': pd.read_csv('~/random_non_digenic_pairs_held_out.csv')[sel_feats]
+    'random': {'pos': pd.read_csv(path_p+'/digenic_pairs_held_out.csv')[sel_feats],
+               'neg': pd.read_csv(path_n+'/random_non_digenic_pairs_held_out.csv')[sel_feats]
                },
-    'matched': {'pos': pd.read_csv('~/digenic_pairs_held_out.csv')[sel_feats],
-                'neg': pd.read_csv('~/matched_non_digenic_pairs_held_out.csv')[sel_feats]
+    'matched': {'pos': pd.read_csv(path_p+'/digenic_pairs_held_out.csv')[sel_feats],
+                'neg': pd.read_csv(path_n+'/matched_non_digenic_pairs_held_out.csv')[sel_feats]
                 },
 
-    'unaffected no gene overlap': {'pos': pd.read_csv('~/digenic_pairs_no_overlap_held_out.csv')[sel_feats],
-                                   'neg': pd.read_csv('~/unaffected no gene overlap_non_digenic_pairs_held_out.csv')[sel_feats]
+    'unaffected no gene overlap': {'pos': pd.read_csv(path_p+'/digenic_pairs_no_overlap_held_out.csv')[sel_feats],
+                                   'neg': pd.read_csv(path_n+'/unaffected no gene overlap_non_digenic_pairs_held_out.csv')[sel_feats]
                                    },
-    'random no gene overlap': {'pos': pd.read_csv('~/digenic_pairs_no_overlap_held_out.csv')[sel_feats],
-                               'neg': pd.read_csv('~/random no gene overlap_non_digenic_pairs_held_out.csv')[sel_feats]
+    'random no gene overlap': {'pos': pd.read_csv(path_p+'/digenic_pairs_no_overlap_held_out.csv')[sel_feats],
+                               'neg': pd.read_csv(path_n+'/random no gene overlap_non_digenic_pairs_held_out.csv')[sel_feats]
                                },
             }
 
 clfs = dict()
-clfs['unaffected'] = pd.read_pickle(
-    '~/DiGePred_unaffected_replace_ind_gene_feats_w QM_mean_Mar24_21.sav')
-clfs['permuted'] = pd.read_pickle(
-    '~/DiGePred_permuted_replace_ind_gene_feats_w QM_mean_Mar24_21.sav')
-clfs['random'] = pd.read_pickle(
-    '~/DiGePred_random_replace_ind_gene_feats_w QM_mean_Mar24_21.sav')
-clfs['matched'] = pd.read_pickle(
-    '~/DiGePred_matched_replace_ind_gene_feats_w QM_mean_Mar24_21.sav')
+if args['remove_phen_features']:
+    model_name = args["path_folder"] + '/output/retrained_models/without_phenotype_features_'
+else:
+    model_name = args["path_folder"] + '/output/retrained_models/'
 
-clfs['unaffected no gene overlap'] = pd.read_pickle(
-    '~/Classifiers/DiGePred_unaffected no gene overlap_replace_ind_gene_feats_w QM_mean_Mar24_21.sav')
-clfs['random no gene overlap'] = pd.read_pickle(
-    '~/Classifiers/DiGePred_random no gene overlap_replace_ind_gene_feats_w QM_mean_Mar24_21.sav')
+clfs['permuted'] = pd.read_pickle(model_name + 'permuted_' + args['date'] + ".sav")
+clfs['random'] = pd.read_pickle(model_name + 'random_' + args['date'] + ".sav")
+clfs['matched'] = pd.read_pickle(model_name + 'matched_' + args['date'] + ".sav")
+clfs['unaffected'] = pd.read_pickle(model_name + 'unaffected_' + args['date'] + ".sav")
+# clfs['all-digenic-vs-unaffected'] = pd.read_pickle(model_name +'all-digenic-vs-unaffected_'+args['date'] + ".sav")
+clfs['unaffected-no-gene-overlap'] = pd.read_pickle(model_name + 'unaffected no gene overlap_' + args['date'] + ".sav")
+clfs['random-no-gene-overlap'] = pd.read_pickle(model_name + 'random no gene overlap_' + args['date'] + ".sav")
 
 
 def get_held_out_validation_df(model):
@@ -390,5 +404,10 @@ def plot_roc_pr_curves(neg_sets):
     ax[1].set_title('PR Curve', fontsize=12)
     ax[1].grid(b=True, which='major', color='#bdbdbd', linestyle='--', lw=0.7, alpha=0.5)
 
-    fig.savefig('~/DiGePred_test_performance_{month}{day}_{year}.pdf'
+    if args["remove_phen_features"]:
+        fig.savefig(model_name = args["path_folder"] + '/output/heldout_performance/without_phenotype_features_DiGePred_test_performance_{month}{day}_{year}.pdf'
                 .format(month=month, day=day, year=year), bbox_inches='tight')
+    else:
+        fig.savefig(model_name = args["path_folder"] + '/output/heldout_performance/DiGePred_test_performance_{month}{day}_{year}.pdf'
+                    .format(month=month, day=day, year=year), bbox_inches='tight')
+plot_roc_pr_curves(models)
