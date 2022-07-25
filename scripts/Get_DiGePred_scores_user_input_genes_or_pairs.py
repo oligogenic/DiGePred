@@ -306,12 +306,12 @@ def get_features(pairs):
         # Lof
 
         if x[0] in lof_dict:
-            v1 = lof_dict[x[0]]
+            v1 = float(lof_dict[x[0]])
         else:
             v1 = 0
 
         if x[1] in lof_dict:
-            v2 = lof_dict[x[1]]
+            v2 = float(lof_dict[x[1]])
         else:
             v2 = 0
 
@@ -321,12 +321,12 @@ def get_features(pairs):
         # Happloinsufficiency Analysis
 
         if x[0] in hap_insuf_dict:
-            v1 = hap_insuf_dict[x[0]]
+            v1 = float(hap_insuf_dict[x[0]])
         else:
             v1 = 0
 
         if x[1] in hap_insuf_dict:
-            v2 = hap_insuf_dict[x[1]]
+            v2 = float(hap_insuf_dict[x[1]])
         else:
             v2 = 0
 
@@ -336,12 +336,12 @@ def get_features(pairs):
         # Protein Age
 
         if x[0] in protein_age_dict:
-            v1 = protein_age_dict[x[0]]
+            v1 = float(protein_age_dict[x[0]])
         else:
             v1 = 0
 
         if x[1] in protein_age_dict:
-            v2 = protein_age_dict[x[1]]
+            v2 = float(protein_age_dict[x[1]])
         else:
             v2 = 0
 
@@ -351,12 +351,12 @@ def get_features(pairs):
         # dN/DS
 
         if x[0] in dNdS_avg_dict:
-            v1 = dNdS_avg_dict[x[0]]
+            v1 = float(dNdS_avg_dict[x[0]])
         else:
             v1 = 0
 
         if x[1] in dNdS_avg_dict:
-            v2 = dNdS_avg_dict[x[1]]
+            v2 = float(dNdS_avg_dict[x[1]])
         else:
             v2 = 0
 
