@@ -2,7 +2,7 @@ from sklearn.metrics import *
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import StratifiedShuffleSplit
 import numpy as np  # numpy == 1.19.5
-import pandas as pd
+import pandas as pd  # version 0.25.1
 import datetime
 import random
 import pickle
@@ -163,9 +163,9 @@ for m in models:
     clf.fit(full_set_X, full_set_y)
     # save the model to disk
     if args['remove_phen_features']:
-        pickle.dump(clf, open(args["path_folder"] + 'output/retrained_models/'+"without_phenotype_features_"+m+'_{month}{day}_{year}.sav'.format(month=month, day=day, year=year), 'wb'))
+        pickle.dump(clf, open(args["path_folder"] + '/output/retrained_models/'+"without_phenotype_features_"+m+'_{month}{day}_{year}.sav'.format(month=month, day=day, year=year), 'wb'))
     else:
-        pickle.dump(clf, open(args["path_folder"] + 'output/retrained_models/'+m+'_{month}{day}_{year}.sav'.format(month=month, day=day, year=year), 'wb'))
+        pickle.dump(clf, open(args["path_folder"] + '/output/retrained_models/'+m+'_{month}{day}_{year}.sav'.format(month=month, day=day, year=year), 'wb'))
 
 data_cols = {
     'ROC_AUCs': roc_aucs,
@@ -186,9 +186,9 @@ for m in models:
         df[d][m] = data_cols[d][m]
 
 if args['remove_phen_features']:
-    df.to_pickle(args["path_folder"] + 'output/training_performance/without_phenotype_features_DiGePred_training_performance_{month}{day}_{year}.pkl'.format(month=month
+    df.to_pickle(args["path_folder"] + '/output/training_performance/without_phenotype_features_DiGePred_training_performance_{month}{day}_{year}.pkl'.format(month=month
                                                                                                              , day=day,
                                                                                                                year=year))
 else:
-    df.to_pickle(args["path_folder"] + 'output/training_performance/DiGePred_training_performance_{month}{day}_{year}.pkl'.format(month=month, day=day, year=year))
+    df.to_pickle(args["path_folder"] + '/output/training_performance/DiGePred_training_performance_{month}{day}_{year}.pkl'.format(month=month, day=day, year=year))
 
