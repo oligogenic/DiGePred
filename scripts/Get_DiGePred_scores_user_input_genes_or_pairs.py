@@ -31,7 +31,7 @@ parser.add_argument('-p', '--pairs', type=str,
                     dest='pairs', required=False,
                     metavar='')
 
-parser.add_argument('-m', '--model', type=str, default='unaffected no gene overlap',
+parser.add_argument('-m', '--model', type=str, default='unaffected-no-gene-overlap',
                     help='DiGePred model to be used. If not provided, the best performing "unaffected-no-gene-overlap" model will be used',
                     dest='model', required=False,
                     metavar='')
@@ -42,46 +42,53 @@ parser.add_argument('-n', '--name', type=str,
                     dest='name', required=False,
                     metavar='')
 parser.add_argument('-w_p', '--with-phenotype', action='store_true', help='The model is trained with all features.')
-parser.add_argument('-wo_p', '--without-phenotype', dest='remove_phen_features', action='store_true', help='The model is trained without the phenotypes features')
+parser.add_argument('-wo_p', '--without-phenotype', dest='remove_phen_features', action='store_true',
+                    help='The model is trained without the phenotypes features')
 parser.set_defaults(remove_phen_features=False)
-parser.add_argument('-path', '--path-to-folder', dest='path_folder', help='Path where the folder DiGePred is stored, ex: /Users/Desktop', required=True, type=str)
-parser.add_argument('-d', '--date-model-name', dest='date', help='date of creation of the re-trained model. Format MMMDD_YY ex: Jul25_222', required=True, type=str)
+parser.add_argument('-path', '--path-to-folder', dest='path_folder',
+                    help='Path where the folder DiGePred is stored, ex: /Users/Desktop', required=True, type=str)
+parser.add_argument('-d', '--date-model-name', dest='date',
+                    help='date of creation of the re-trained model. Format MMMDD_YY ex: Jul25_222', required=True,
+                    type=str)
 
 args = vars(parser.parse_args())
 
-
 ## Load pathway data files
-reactome_gene_to_path_codes = pickle.load(open(args["path_folder"]+'/DiGePred/data/pathways/reactome/reactome_gene_to_path_codes.txt', 'rb'))
-kegg_gene_to_path_codes = pickle.load(open(args["path_folder"]+'/DiGePred/data/pathways/kegg/kegg_gene_to_path_codes.txt', 'rb'))
+reactome_gene_to_path_codes = pickle.load(
+    open(args["path_folder"] + '/DiGePred/data/pathways/reactome/reactome_gene_to_path_codes.txt', 'rb'))
+kegg_gene_to_path_codes = pickle.load(
+    open(args["path_folder"] + '/DiGePred/data/pathways/kegg/kegg_gene_to_path_codes.txt', 'rb'))
 
 ## Load phenotype data files
-hpo_gene_to_code = pickle.load(open(args["path_folder"]+'/DiGePred/data/phenotypes/hpo/hpo_gene_to_code.txt', 'rb'))
+hpo_gene_to_code = pickle.load(open(args["path_folder"] + '/DiGePred/data/phenotypes/hpo/hpo_gene_to_code.txt', 'rb'))
 
 ## Load co-expression data files
-coexpress_dict = pickle.load(open(args["path_folder"]+'/DiGePred/data/coex/mutual_co-expression_rank_dict.txt', 'rb'))
+coexpress_dict = pickle.load(open(args["path_folder"] + '/DiGePred/data/coex/mutual_co-expression_rank_dict.txt', 'rb'))
 
 ## Load network data files
-G_ppi = nx.read_dot(args["path_folder"]+'/DiGePred/data/networks/UCSC_ppi_network_new.dot')
-G_pwy = nx.read_dot(args["path_folder"]+'/DiGePred/data/networks/UCSC_pwy_network_new.dot')
-G_txt = nx.read_dot(args["path_folder"]+'/DiGePred/data/networks/UCSC_txt_network_new.dot')
+G_ppi = nx.read_dot(args["path_folder"] + '/DiGePred/data/networks/UCSC_ppi_network_new.dot')
+G_pwy = nx.read_dot(args["path_folder"] + '/DiGePred/data/networks/UCSC_pwy_network_new.dot')
+G_txt = nx.read_dot(args["path_folder"] + '/DiGePred/data/networks/UCSC_txt_network_new.dot')
 
-dists_ppi = pickle.load(open(args["path_folder"]+'/DiGePred/data/networks/PPI_network_all_pairs_shortest_paths_Feb21_19.pkl', 'rb'))
-dists_pwy = pickle.load(open(args["path_folder"]+'/DiGePred/data/networks/PWY_network_all_pairs_shortest_paths_Feb21_19.pkl', 'rb'))
-dists_txt = pickle.load(open(args["path_folder"]+'/DiGePred/data/networks/Txt_network_all_pairs_shortest_paths_Feb21_19.pkl', 'rb'))
+dists_ppi = pickle.load(
+    open(args["path_folder"] + '/DiGePred/data/networks/PPI_network_all_pairs_shortest_paths_Feb21_19.pkl', 'rb'))
+dists_pwy = pickle.load(
+    open(args["path_folder"] + '/DiGePred/data/networks/PWY_network_all_pairs_shortest_paths_Feb21_19.pkl', 'rb'))
+dists_txt = pickle.load(
+    open(args["path_folder"] + '/DiGePred/data/networks/Txt_network_all_pairs_shortest_paths_Feb21_19.pkl', 'rb'))
 
 ## Load evoltuonary biology and genomics feature data files
-lof_dict = pickle.load(open(args["path_folder"]+'/DiGePred/data/evolgen/lof_pli_dict.pickle', 'rb'))
-hap_insuf_dict = pickle.load(open(args["path_folder"]+'/DiGePred/data/evolgen/happloinsufficiency_dict.pickle', 'rb'))
-protein_age_dict = pickle.load(open(args["path_folder"]+'/DiGePred/data/evolgen/protein_age_dict.pickle', 'rb'))
-dNdS_avg_dict = pickle.load(open(args["path_folder"]+'/DiGePred/data/evolgen/dNdS_avg.pickle', 'rb'))
-gene_ess_dict = pickle.load(open(args["path_folder"]+'/DiGePred/data/evolgen/Gene_Essentiality_dict.txt', 'rb'))
-
+lof_dict = pickle.load(open(args["path_folder"] + '/DiGePred/data/evolgen/lof_pli_dict.pickle', 'rb'))
+hap_insuf_dict = pickle.load(open(args["path_folder"] + '/DiGePred/data/evolgen/happloinsufficiency_dict.pickle', 'rb'))
+protein_age_dict = pickle.load(open(args["path_folder"] + '/DiGePred/data/evolgen/protein_age_dict.pickle', 'rb'))
+dNdS_avg_dict = pickle.load(open(args["path_folder"] + '/DiGePred/data/evolgen/dNdS_avg.pickle', 'rb'))
+gene_ess_dict = pickle.load(open(args["path_folder"] + '/DiGePred/data/evolgen/Gene_Essentiality_dict.txt', 'rb'))
 
 genes = []
 pairs = []
 
 if parser.parse_args().pairs:
-    pairs_list = open(args["path_folder"] +"/"+ parser.parse_args().pairs).read().split('\n')[:-1]
+    pairs_list = open(args["path_folder"] + "/" + parser.parse_args().pairs).read().split('\n')[:-1]
 
     for line in pairs_list:
         g1 = line.split(',')[0].strip().rstrip()
@@ -102,7 +109,6 @@ else:
 project_name = parser.parse_args().name
 model = parser.parse_args().model
 
-
 ## Load DiGePred models
 
 clfs = dict()
@@ -111,18 +117,17 @@ if args['remove_phen_features']:
 else:
     model_name = args["path_folder"] + '/output/retrained_models/'
 
-clfs['permuted'] = pd.read_pickle(model_name+'permuted_'+args['date'] + ".sav")
-clfs['random'] = pd.read_pickle(model_name +'random_'+args['date'] + ".sav")
-clfs['matched'] = pd.read_pickle(model_name +'matched_'+args['date'] + ".sav")
-clfs['unaffected'] = pd.read_pickle(model_name +'unaffected_'+args['date'] + ".sav")
-#clfs['all-digenic-vs-unaffected'] = pd.read_pickle(model_name +'all-digenic-vs-unaffected_'+args['date'] + ".sav")
-clfs['unaffected-no-gene-overlap'] = pd.read_pickle(model_name+'unaffected no gene overlap_'+args['date'] + ".sav")
-clfs['random-no-gene-overlap'] = pd.read_pickle(model_name +'random no gene overlap_'+args['date'] + ".sav")
+clfs['permuted'] = pd.read_pickle(model_name + 'permuted_' + args['date'] + ".sav")
+clfs['random'] = pd.read_pickle(model_name + 'random_' + args['date'] + ".sav")
+clfs['matched'] = pd.read_pickle(model_name + 'matched_' + args['date'] + ".sav")
+clfs['unaffected'] = pd.read_pickle(model_name + 'unaffected_' + args['date'] + ".sav")
+# clfs['all-digenic-vs-unaffected'] = pd.read_pickle(model_name +'all-digenic-vs-unaffected_'+args['date'] + ".sav")
+clfs['unaffected-no-gene-overlap'] = pd.read_pickle(model_name + 'unaffected no gene overlap_' + args['date'] + ".sav")
+clfs['random-no-gene-overlap'] = pd.read_pickle(model_name + 'random no gene overlap_' + args['date'] + ".sav")
 
 
 ## Function to get feature values as a pandas dataframe
 def get_features(pairs):
-
     new_list_pairs = [tuple(sorted(p)) for p in list(set(pairs))]
 
     all_data = []
@@ -415,39 +420,45 @@ def get_features(pairs):
     ])
 
     # Rename df columns in order to match columns name in the training
-    df = df.rename(columns={'#ofpathways':"#ofpathways_combined",
-                             '#ofphenotypes':"#ofPhenotypeCodes_combined",
-                             '#ofNeighborsPPI':"#ofNeighborsPPI_combined",
-                             '#ofNeighborsPWY':"#ofNeighborsPWY_combined",
-                             '#ofNeighborsTxt':"#ofNeighborsTxt_combined",
-                             '#ofHighlyCoexpressed':"#ofHighlyCoexpressed_combined",
-                             'LoFintolerance':"LoFintolerance_combined",
-                             'Haploinsufficiency':"Haploinsufficiency_combined",
-                             'protein_Age': "Age_combined",
-                             'dN/dS':"dN/dS_combined",
-                             'Essentiality':"Essentiality_combined"})
+    df = df.rename(columns={'#ofpathways': "#ofpathways_combined",
+                            '#ofphenotypes': "#ofPhenotypeCodes_combined",
+                            '#ofNeighborsPPI': "#ofNeighborsPPI_combined",
+                            '#ofNeighborsPWY': "#ofNeighborsPWY_combined",
+                            '#ofNeighborsTxt': "#ofNeighborsTxt_combined",
+                            '#ofHighlyCoexpressed': "#ofHighlyCoexpressed_combined",
+                            'LoFintolerance': "LoFintolerance_combined",
+                            'Haploinsufficiency': "Haploinsufficiency_combined",
+                            'protein_Age': "Age_combined",
+                            'dN/dS': "dN/dS_combined",
+                            'Essentiality': "Essentiality_combined"})
     # Reorder columns to matche the column's order during the training
     df = df[["common_pathways", "common_phenotypes", "Co-expression_coefficient", "PPI_network_dist", \
-         "PWY_network_dist","Txt_network_dist","LoFintolerance_combined","Haploinsufficiency_combined", \
-         "Age_combined","dN/dS_combined","Essentiality_combined","#ofpathways_combined", \
-         "#ofPhenotypeCodes_combined","#ofNeighborsPPI_combined","#ofNeighborsPWY_combined", \
-         "#ofNeighborsTxt_combined","#ofHighlyCoexpressed_combined","#Common_PPI_Neighbors", \
-         "#common_PWY_neighbors","#Common_Txt_Neighbors","#Common_coexpressed"]]
-
+             "PWY_network_dist", "Txt_network_dist", "LoFintolerance_combined", "Haploinsufficiency_combined", \
+             "Age_combined", "dN/dS_combined", "Essentiality_combined", "#ofpathways_combined", \
+             "#ofPhenotypeCodes_combined", "#ofNeighborsPPI_combined", "#ofNeighborsPWY_combined", \
+             "#ofNeighborsTxt_combined", "#ofHighlyCoexpressed_combined", "#Common_PPI_Neighbors", \
+             "#common_PWY_neighbors", "#Common_Txt_Neighbors", "#Common_coexpressed"]]
+    print(df.head())
     return df
 
 
 if __name__ == '__main__':
 
     digepred_res_df = get_features(pairs)  # get feature values and save in a pandas DiGePred results df.
+    if args['remove_phen_features']:
+        print("before df shape:", digepred_res_df.shape)
+        digepred_res_df.drop("common_phenotypes", axis=1, inplace=True)
+        digepred_res_df.drop("#ofPhenotypeCodes_combined", axis=1, inplace=True)
+        print("phenotype features removed", digepred_res_df.shape)
     p = clfs[model].predict_proba(digepred_res_df)[:, 1]  # get predictions based on DiGePred model specified.
     digepred_res_df[model] = p  # add column to DiGePred result df.
 
-    digepred_res_df.to_csv(args["path_folder"]+'/output/scores_pairs_input/{resultat_{project_name}.csv'.format(project_name=project_name),
-                    sep=',', header=True, index=False)  # save feature values and predictions as DiGePred results CSV.
-
-if args['remove_phen_features']:
-    print("before df shape:", df.shape)
-    df.drop("common_phenotypes", axis=1, inplace=True)
-    df.drop("#ofPhenotypeCodes_combined", axis=1, inplace=True)
-    print("phenotype features removed", df.shape)
+    if args['remove_phen_features']:
+        digepred_res_df.to_csv(args[
+                                   "path_folder"] + '/output/scores_pairs_input/without_phenotype_features_results' + project_name + '.csv',
+                               sep='\t', header=True,
+                               index=True)  # save feature values and predictions as DiGePred results CSV.
+    else:
+        digepred_res_df.to_csv(args["path_folder"] + '/output/scores_pairs_input/results_' + project_name + '.csv',
+                               sep='\t', header=True,
+                               index=True)  # save feature values and predictions as DiGePred results CSV.

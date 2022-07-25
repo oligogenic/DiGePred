@@ -8,7 +8,6 @@ import random
 import pickle
 import argparse
 
-
 now = datetime.datetime.now()
 month = str(now.strftime("%b"))
 day = str(now.strftime("%d"))
@@ -16,9 +15,11 @@ year = str(now.strftime("%y"))
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-w_p', '--with-phenotype', action='store_true', help='The model is trained with all features.')
-parser.add_argument('-wo_p', '--without-phenotype', dest='remove_phen_features', action='store_true', help='The model is trained without the phenotypes features')
+parser.add_argument('-wo_p', '--without-phenotype', dest='remove_phen_features', action='store_true',
+                    help='The model is trained without the phenotypes features')
 parser.set_defaults(remove_phen_features=False)
-parser.add_argument('-p', '--path-to-folder', dest='path_folder', help='Path where the folder DiGePred is stored, ex: /Users/Desktop', required=True, type=str)
+parser.add_argument('-p', '--path-to-folder', dest='path_folder',
+                    help='Path where the folder DiGePred is stored, ex: /Users/Desktop', required=True, type=str)
 args = vars(parser.parse_args())
 
 sel_feats = ['common_pathways',
@@ -45,20 +46,30 @@ sel_feats = ['common_pathways',
              ]
 
 # Import dfs
-digenic_training = pd.read_csv(args["path_folder"]+"/DiGePred/positives/training/digenic_DIDA_pairs_training.csv", index_col=0)
-digenic_training_no_overlap = pd.read_csv(args["path_folder"]+'/DiGePred/positives/training/digenic_DIDA_pairs_no-gene-overlap_training.csv', index_col=0)
-unaffected_non_digenic_training = pd.read_csv(args["path_folder"]+'/DiGePred/negatives/training/unaffected_non_digenic_pairs_training.csv', index_col=0)
-random_non_digenic_training = pd.read_csv(args["path_folder"]+'/DiGePred/negatives/training/random_non_digenic_pairs_training.csv', index_col=0)
-permuted_non_digenic_training = pd.read_csv(args["path_folder"]+'/DiGePred/negatives/training/permuted_non_digenic_pairs_training.csv', index_col=0)
-matched_non_digenic_training = pd.read_csv(args["path_folder"]+'/DiGePred/negatives/training/matched_non_digenic_pairs_training.csv', index_col=0)
-unaffected_no_gene_overlap_non_digenic_training = pd.read_csv(args["path_folder"]+'/DiGePred/negatives/training/unaffected-no-gene-overlap_non_digenic_pairs_training.csv', index_col=0)
-random_no_gene_overlap_non_digenic_training = pd.read_csv(args["path_folder"]+'/DiGePred/negatives/training/random-no-gene-overlap_non_digenic_pairs_training.csv', index_col=0)
+digenic_training = pd.read_csv(args["path_folder"] + "/DiGePred/positives/training/digenic_DIDA_pairs_training.csv",
+                               index_col=0)
+digenic_training_no_overlap = pd.read_csv(
+    args["path_folder"] + '/DiGePred/positives/training/digenic_DIDA_pairs_no-gene-overlap_training.csv', index_col=0)
+unaffected_non_digenic_training = pd.read_csv(
+    args["path_folder"] + '/DiGePred/negatives/training/unaffected_non_digenic_pairs_training.csv', index_col=0)
+random_non_digenic_training = pd.read_csv(
+    args["path_folder"] + '/DiGePred/negatives/training/random_non_digenic_pairs_training.csv', index_col=0)
+permuted_non_digenic_training = pd.read_csv(
+    args["path_folder"] + '/DiGePred/negatives/training/permuted_non_digenic_pairs_training.csv', index_col=0)
+matched_non_digenic_training = pd.read_csv(
+    args["path_folder"] + '/DiGePred/negatives/training/matched_non_digenic_pairs_training.csv', index_col=0)
+unaffected_no_gene_overlap_non_digenic_training = pd.read_csv(
+    args["path_folder"] + '/DiGePred/negatives/training/unaffected-no-gene-overlap_non_digenic_pairs_training.csv',
+    index_col=0)
+random_no_gene_overlap_non_digenic_training = pd.read_csv(
+    args["path_folder"] + '/DiGePred/negatives/training/random-no-gene-overlap_non_digenic_pairs_training.csv',
+    index_col=0)
 
-if args['remove_phen_features']:
-    list_dfs = [digenic_training, digenic_training_no_overlap, unaffected_non_digenic_training,
-                random_non_digenic_training, permuted_non_digenic_training, matched_non_digenic_training,
-                unaffected_no_gene_overlap_non_digenic_training, random_no_gene_overlap_non_digenic_training]
-    for dataframe in list_dfs:
+list_dfs = [digenic_training, digenic_training_no_overlap, unaffected_non_digenic_training,
+            random_non_digenic_training, permuted_non_digenic_training, matched_non_digenic_training,
+            unaffected_no_gene_overlap_non_digenic_training, random_no_gene_overlap_non_digenic_training]
+for dataframe in list_dfs:
+    if args['remove_phen_features']:
         dataframe.drop("common_phenotypes", axis=1, inplace=True)
         dataframe.drop("#ofPhenotypeCodes_combined", axis=1, inplace=True)
 
@@ -75,7 +86,7 @@ models = {'unaffected': {'pos': digenic_training,
           'unaffected no gene overlap': {'pos': digenic_training_no_overlap,
                                          'neg': unaffected_no_gene_overlap_non_digenic_training},
           'random no gene overlap': {'pos': digenic_training_no_overlap,
-                                    'neg': random_no_gene_overlap_non_digenic_training},
+                                     'neg': random_no_gene_overlap_non_digenic_training},
           }
 
 roc_aucs = {}
@@ -163,9 +174,14 @@ for m in models:
     clf.fit(full_set_X, full_set_y)
     # save the model to disk
     if args['remove_phen_features']:
-        pickle.dump(clf, open(args["path_folder"] + '/output/retrained_models/'+"without_phenotype_features_"+m+'_{month}{day}_{year}.sav'.format(month=month, day=day, year=year), 'wb'))
+        pickle.dump(clf, open(args[
+                                  "path_folder"] + '/output/retrained_models/' + "without_phenotype_features_" + m + '_{month}{day}_{year}.sav'.format(
+            month=month, day=day, year=year), 'wb'))
     else:
-        pickle.dump(clf, open(args["path_folder"] + '/output/retrained_models/'+m+'_{month}{day}_{year}.sav'.format(month=month, day=day, year=year), 'wb'))
+        pickle.dump(clf, open(
+            args["path_folder"] + '/output/retrained_models/' + m + '_{month}{day}_{year}.sav'.format(month=month,
+                                                                                                      day=day,
+                                                                                                      year=year), 'wb'))
 
 data_cols = {
     'ROC_AUCs': roc_aucs,
@@ -186,9 +202,12 @@ for m in models:
         df[d][m] = data_cols[d][m]
 
 if args['remove_phen_features']:
-    df.to_pickle(args["path_folder"] + '/output/training_performance/without_phenotype_features_DiGePred_training_performance_{month}{day}_{year}.pkl'.format(month=month
-                                                                                                             , day=day,
-                                                                                                               year=year))
+    df.to_pickle(args[
+                     "path_folder"] + '/output/training_performance/without_phenotype_features_DiGePred_training_performance_{month}{day}_{year}.pkl'.format(
+        month=month
+        , day=day,
+        year=year))
 else:
-    df.to_pickle(args["path_folder"] + '/output/training_performance/DiGePred_training_performance_{month}{day}_{year}.pkl'.format(month=month, day=day, year=year))
-
+    df.to_pickle(args[
+                     "path_folder"] + '/output/training_performance/DiGePred_training_performance_{month}{day}_{year}.pkl'.format(
+        month=month, day=day, year=year))
