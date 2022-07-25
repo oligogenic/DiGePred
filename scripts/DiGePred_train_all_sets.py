@@ -68,8 +68,8 @@ random_no_gene_overlap_non_digenic_training = pd.read_csv(
 list_dfs = [digenic_training, digenic_training_no_overlap, unaffected_non_digenic_training,
             random_non_digenic_training, permuted_non_digenic_training, matched_non_digenic_training,
             unaffected_no_gene_overlap_non_digenic_training, random_no_gene_overlap_non_digenic_training]
-for dataframe in list_dfs:
-    if args['remove_phen_features']:
+if args['remove_phen_features']:
+    for dataframe in list_dfs:
         dataframe.drop("common_phenotypes", axis=1, inplace=True)
         dataframe.drop("#ofPhenotypeCodes_combined", axis=1, inplace=True)
 
@@ -174,14 +174,14 @@ for m in models:
     clf.fit(full_set_X, full_set_y)
     # save the model to disk
     if args['remove_phen_features']:
-        pickle.dump(clf, open(args[
-                                  "path_folder"] + '/output/retrained_models/' + "without_phenotype_features_" + m + '_{month}{day}_{year}.sav'.format(
+        pickle.dump(clf, open(args["path_folder"] + '/output/retrained_models/' + "without_phenotype_features_" + m + '_{month}{day}_{year}.sav'.format(
             month=month, day=day, year=year), 'wb'))
+
     else:
-        pickle.dump(clf, open(
-            args["path_folder"] + '/output/retrained_models/' + m + '_{month}{day}_{year}.sav'.format(month=month,
+        pickle.dump(clf, open(args["path_folder"] + '/output/retrained_models/' + m + '_{month}{day}_{year}.sav'.format(month=month,
                                                                                                       day=day,
                                                                                                       year=year), 'wb'))
+
 
 data_cols = {
     'ROC_AUCs': roc_aucs,
@@ -202,12 +202,10 @@ for m in models:
         df[d][m] = data_cols[d][m]
 
 if args['remove_phen_features']:
-    df.to_pickle(args[
-                     "path_folder"] + '/output/training_performance/without_phenotype_features_DiGePred_training_performance_{month}{day}_{year}.pkl'.format(
+    df.to_pickle(args["path_folder"] + '/output/training_performance/without_phenotype_features_DiGePred_training_performance_{month}{day}_{year}.pkl'.format(
         month=month
         , day=day,
         year=year))
 else:
-    df.to_pickle(args[
-                     "path_folder"] + '/output/training_performance/DiGePred_training_performance_{month}{day}_{year}.pkl'.format(
+    df.to_pickle(args["path_folder"] + '/output/training_performance/DiGePred_training_performance_{month}{day}_{year}.pkl'.format(
         month=month, day=day, year=year))
