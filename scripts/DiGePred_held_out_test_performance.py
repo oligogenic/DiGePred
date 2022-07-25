@@ -18,6 +18,9 @@ parser.add_argument('-wo_p', '--without-phenotype', dest='remove_phen_features',
 parser.set_defaults(remove_phen_features=False)
 parser.add_argument('-p', '--path-to-folder', dest='path_folder',
                     help='Path where the folder DiGePred is stored, ex: /Users/Desktop', required=True, type=str)
+parser.add_argument('-d', '--date-model-name', dest='date',
+                    help='date of creation of the re-trained model. Format MMMDD_YY ex: Jul25_222', required=True,
+                    type=str)
 args = vars(parser.parse_args())
 
 sel_feats = ['common_pathways',
@@ -51,32 +54,32 @@ clf_set_col = {'permuted': '#fd8d3c',
                'matched': '#969696',
                'unaffected': '#6baed6',
                'all digenic vs unaffected': '#6baed6',
-               'unaffected no gene overlap': '#08519c',
-               'random no gene overlap': '#c7e9c0'
+               'unaffected-no-gene-overlap': '#08519c',
+               'random-no-gene-overlap': '#c7e9c0'
                }
 
 path_n = args["path_folder"] + '/DiGePred/negatives/held-out-testing'
 path_p = args["path_folder"] + '/DiGePred/positives/held-out-testing'
 
 models = {
-    'unaffected': {'pos': pd.read_csv(path_p+'/digenic_pairs_held_out.csv')[sel_feats],
-                   'neg': pd.read_csv(path_n+'/unaffected_non_digenic_pairs_held_out.csv')[sel_feats]
+    'unaffected': {'pos': pd.read_csv(path_p+'/digenic_pairs_DIDA_held_out_test.csv')[sel_feats],
+                   'neg': pd.read_csv(path_n+'/unaffected_non_digenic_pairs_held_out_test.csv')[sel_feats]
                    },
-    'permuted': {'pos': pd.read_csv(path_p+'/digenic_pairs_held_out.csv')[sel_feats],
-                 'neg': pd.read_csv(path_n+'/permuted_non_digenic_pairs_held_out.csv')[sel_feats]
+    'permuted': {'pos': pd.read_csv(path_p+'/digenic_pairs_DIDA_held_out_test.csv')[sel_feats],
+                 'neg': pd.read_csv(path_n+'/permuted_non_digenic_pairs_held_out_test.csv')[sel_feats]
                  },
-    'random': {'pos': pd.read_csv(path_p+'/digenic_pairs_held_out.csv')[sel_feats],
-               'neg': pd.read_csv(path_n+'/random_non_digenic_pairs_held_out.csv')[sel_feats]
+    'random': {'pos': pd.read_csv(path_p+'/digenic_pairs_DIDA_held_out_test.csv')[sel_feats],
+               'neg': pd.read_csv(path_n+'/random_non_digenic_pairs_held_out_test.csv')[sel_feats]
                },
-    'matched': {'pos': pd.read_csv(path_p+'/digenic_pairs_held_out.csv')[sel_feats],
-                'neg': pd.read_csv(path_n+'/matched_non_digenic_pairs_held_out.csv')[sel_feats]
+    'matched': {'pos': pd.read_csv(path_p+'/digenic_pairs_DIDA_held_out_test.csv')[sel_feats],
+                'neg': pd.read_csv(path_n+'/matched_non_digenic_pairs_held_out_test.csv')[sel_feats]
                 },
 
-    'unaffected no gene overlap': {'pos': pd.read_csv(path_p+'/digenic_pairs_no_overlap_held_out.csv')[sel_feats],
-                                   'neg': pd.read_csv(path_n+'/unaffected no gene overlap_non_digenic_pairs_held_out.csv')[sel_feats]
+    'unaffected-no-gene-overlap': {'pos': pd.read_csv(path_p+'/digenic_pairs_DIDA_no-gene-overlap_held_out_test.csv')[sel_feats],
+                                   'neg': pd.read_csv(path_n+'/unaffected-no-gene-overlap_non_digenic_pairs_held_out_test.csv')[sel_feats]
                                    },
-    'random no gene overlap': {'pos': pd.read_csv(path_p+'/digenic_pairs_no_overlap_held_out.csv')[sel_feats],
-                               'neg': pd.read_csv(path_n+'/random no gene overlap_non_digenic_pairs_held_out.csv')[sel_feats]
+    'random-no-gene-overlap': {'pos': pd.read_csv(path_p+'/digenic_pairs_DIDA_no-gene-overlap_held_out_test.csv')[sel_feats],
+                               'neg': pd.read_csv(path_n+'/random-no-gene-overlap_non_digenic_pairs_held_out_test.csv')[sel_feats]
                                },
             }
 
@@ -405,9 +408,9 @@ def plot_roc_pr_curves(neg_sets):
     ax[1].grid(b=True, which='major', color='#bdbdbd', linestyle='--', lw=0.7, alpha=0.5)
 
     if args["remove_phen_features"]:
-        fig.savefig(model_name = args["path_folder"] + '/output/heldout_performance/without_phenotype_features_DiGePred_test_performance_{month}{day}_{year}.pdf'
+        fig.savefig(args["path_folder"] + '/output/heldout_performance/without_phenotype_features_DiGePred_test_performance_{month}{day}_{year}.pdf'
                 .format(month=month, day=day, year=year), bbox_inches='tight')
     else:
-        fig.savefig(model_name = args["path_folder"] + '/output/heldout_performance/DiGePred_test_performance_{month}{day}_{year}.pdf'
+        fig.savefig(args["path_folder"] + '/output/heldout_performance/DiGePred_test_performance_{month}{day}_{year}.pdf'
                     .format(month=month, day=day, year=year), bbox_inches='tight')
 plot_roc_pr_curves(models)
