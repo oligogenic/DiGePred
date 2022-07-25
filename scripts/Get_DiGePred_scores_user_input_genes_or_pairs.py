@@ -413,6 +413,12 @@ def get_features(pairs):
 
     ])
 
+    if args['remove_phen_features']:
+        print("before df shape:", df.shape)
+        df.drop("common_phenotypes", axis=1, inplace=True)
+        df.drop("#ofPhenotypeCodes_combined", axis=1, inplace=True)
+        print("phenotype features removed", df.shape)
+
     return df
 
 
